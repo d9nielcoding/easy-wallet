@@ -3,15 +3,8 @@ import { cn } from "@/lib/utils";
 import { History, Home, RefreshCw, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
 
 export default function Footer() {
-  const pathname = usePathname();
-
-  useEffect(() => {
-    console.log(pathname);
-  }, [pathname]);
-
   return (
     <div className="bg-card text-muted-foreground fixed bottom-0 flex h-[74px] w-full justify-center">
       <div className="flex w-full max-w-[540px] items-center justify-around px-4">

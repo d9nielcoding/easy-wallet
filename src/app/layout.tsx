@@ -1,8 +1,7 @@
-import Footer from "@/components/Footer";
-import Header from "@/components/Header";
+import "@/app/globals.css";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import { ProviderLayer } from "./middleware";
 import Favicon from "/public/easy-wallet.png";
 
 const geistSans = Geist({
@@ -29,11 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} dark mx-auto flex w-full max-w-[540px] flex-col items-center antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} dark mx-auto flex w-full flex-col items-center antialiased`}
       >
-        <Header />
-        <main className="mt-[59px] w-full px-4 pb-4">{children}</main>
-        <Footer />
+        <ProviderLayer>{children}</ProviderLayer>
       </body>
     </html>
   );
