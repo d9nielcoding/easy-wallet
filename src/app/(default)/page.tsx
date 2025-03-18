@@ -2,19 +2,21 @@
 
 import ListCard from "@/components/ListCard";
 import SquareCard from "@/components/SquareCard";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { TokenImages } from "@/constants/images";
 import { tokenNames } from "@/constants/token";
 import { useCopy } from "@/hooks/useCopy";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useWallet } from "@/hooks/useWallet";
 import { getTokenPrice } from "@/lib/price";
-import { Currency, IAccount, IToken, Token } from "@/types/bo";
+import { Currency, Erc20Token, IAccount, IToken, Token } from "@/types/bo";
 import { Copy, CreditCard, QrCode, RefreshCw, Send } from "lucide-react";
 import Image from "next/image";
 import { QRCodeSVG } from "qrcode.react";
@@ -54,7 +56,55 @@ export default function HomePage() {
   const [account] = useLocalStorage<IAccount | null>("account", null);
   const [tokens, setTokens] = useState<Record<Token, IToken>>(tokenSettings);
   const { handleCopyAddress } = useCopy();
-  const { getBalance } = useWallet();
+  const { getBalance, sendEth, sendErc20 } = useWallet();
+
+  const [sendTokenDialogStep, setSendTokenDialogStep] = useState<
+    "selectToken" | "enterAmount" | "finished"
+  >("selectToken");
+
+  const [selectedToken, setSelectedToken] = useState<Token>(Token.ETH);
+  const [recipientAddress, setRecipientAddress] = useState<string>("");
+  const [sendAmount, setSendAmount] = useState<number>(0);
+  const [sendTokenResponseMessage, setSendTokenResponseMessage] =
+    useState<string>("");
+
+  const [openSendTokenDialog, setOpenSendTokenDialog] = useState(false);
+  useEffect(() => {
+    if (openSendTokenDialog) {
+      setSendTokenDialogStep("selectToken");
+      setSendTokenResponseMessage("");
+      setSelectedToken(Token.ETH);
+      setRecipientAddress("");
+      setSendAmount(0);
+    }
+  }, [openSendTokenDialog]);
+
+  const handleSelectToken = (token: IToken) => {
+    setSelectedToken(token.name);
+    setSendTokenDialogStep("enterAmount");
+  };
+
+  const handleSendToken = async () => {
+    try {
+      if (selectedToken === Token.ETH) {
+        await sendEth(recipientAddress, sendAmount.toString());
+      } else {
+        await sendErc20(
+          selectedToken as unknown as Erc20Token,
+          recipientAddress,
+          sendAmount.toString()
+        );
+      }
+      setSendTokenResponseMessage(
+        `Transaction ${selectedToken} sent successfully, please check the transaction in the history page later.`
+      );
+    } catch (error) {
+      console.error(`[Transaction] ${error}`);
+      setSendTokenResponseMessage(`Transaction Error`);
+    } finally {
+      setSendTokenDialogStep("finished");
+    }
+  };
 
   useEffect(() => {
     if (!account) {
@@ -135,7 +185,10 @@ export default function HomePage() {
             )}
           </DialogContent>
         </Dialog>
-        <Dialog>
+        <Dialog
+          open={openSendTokenDialog}
+          onOpenChange={setOpenSendTokenDialog}
+        >
           <DialogTrigger asChild>
             <SquareCard>
               <Send size={24} color="var(--primary)" />
@@ -143,30 +196,76 @@ export default function HomePage() {
             </SquareCard>
           </DialogTrigger>
           <DialogContent className="flex w-2/3 flex-col items-center justify-center gap-6 border-none">
-            <DialogTitle className="text-xl font-semibold">Send</DialogTitle>
+            <DialogTitle className="text-xl font-semibold">
+              {sendTokenDialogStep === "selectToken"
+                ? "Send"
+                : sendTokenDialogStep === "enterAmount"
+                  ? `Send ${selectedToken}`
+                  : "Finished"}
+            </DialogTitle>
             <div className="flex w-full flex-col gap-2">
-              {Object.values(tokens).map((token, index) => (
-                <ListCard
-                  key={index}
-                  disabled={token.disabled}
-                  className="flex cursor-default items-center justify-between"
-                >
-                  <div className="flex items-center space-x-4">
-                    <Image
-                      src={token.icon}
-                      alt={token.name}
-                      width={30}
-                      height={30}
-                    />
-                    <div className="flex flex-col gap-1">
-                      <h3 className="text-foreground text-lg">{token.name}</h3>
-                      <p className="text-muted-foreground text-xs">
-                        {token.balance} {token.symbol}
-                      </p>
+              {sendTokenDialogStep === "selectToken" && (
+                <>
+                  {Object.values(tokens).map((token) => (
+                    <div
+                      key={`send-${token.name}`}
+                      className="cursor-pointer"
+                      onClick={() => handleSelectToken(token)}
+                    >
+                      <ListCard
+                        disabled={token.disabled}
+                        className="flex cursor-default items-center justify-between"
+                      >
+                        <div className="flex items-center space-x-4">
+                          <Image
+                            src={token.icon}
+                            alt={token.name}
+                            width={30}
+                            height={30}
+                          />
+                          <div className="flex flex-col gap-1">
+                            <h3 className="text-foreground text-lg">
+                              {token.name}
+                            </h3>
+                            <p className="text-muted-foreground text-xs">
+                              {token.balance} {token.symbol}
+                            </p>
+                          </div>
+                        </div>
+                      </ListCard>
                     </div>
-                  </div>
-                </ListCard>
-              ))}
+                  ))}
+                </>
+              )}
+              {sendTokenDialogStep === "enterAmount" && (
+                <div className="flex w-full flex-col gap-2">
+                  <Input
+                    type="string"
+                    placeholder={`Recipient's ${selectedToken} address`}
+                    value={recipientAddress}
+                    onChange={(e) => setRecipientAddress(e.target.value)}
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Amount"
+                    value={sendAmount}
+                    onChange={(e) => setSendAmount(Number(e.target.value))}
+                  />
+                  <Button
+                    disabled={!recipientAddress || sendAmount <= 0}
+                    onClick={() => handleSendToken()}
+                  >
+                    Send
+                  </Button>
+                </div>
+              )}
+              {sendTokenDialogStep === "finished" && (
+                <div className="flex w-full flex-col gap-2">
+                  <p className="text-foreground text-center">
+                    {sendTokenResponseMessage}
+                  </p>
+                </div>
+              )}
             </div>
           </DialogContent>
         </Dialog>

@@ -73,11 +73,7 @@ export function useWallet() {
     }
   };
 
-  const sendEth = async (
-    senderPrivateKey: string,
-    to: string,
-    amountEth: string
-  ) => {
+  const sendEth = async (to: string, amountEth: string) => {
     if (!wallet) {
       console.log("Error: Wallet not found");
       return;
@@ -88,9 +84,9 @@ export function useWallet() {
       value: ethers.parseEther(amountEth), // 轉換 ETH 為 Wei
     });
 
-    console.log("交易發送中...", tx.hash);
+    console.log("Transaction sending...", tx.hash);
     await tx.wait(); // 等待確認
-    console.log("交易成功:", tx.hash);
+    console.log("Transaction success:", tx.hash);
   };
 
   const sendErc20 = async (
@@ -98,7 +94,8 @@ export function useWallet() {
     to: string,
     amount: string
   ) => {
-    if (!account?.wallet.address) {
+    console.log("sendErc20", erc20Token, to, amount);
+    if (!wallet) {
       console.log("Error: Wallet not found");
       return;
     }
@@ -106,16 +103,16 @@ export function useWallet() {
     const erc20Contract = new ethers.Contract(
       tokenAddresses[erc20Token],
       erc20Abi,
-      provider
+      wallet
     );
 
     const decimals = await erc20Contract.decimals();
     const amountInUnits = ethers.parseUnits(amount, decimals);
 
     const tx = await erc20Contract.transfer(to, amountInUnits);
-    console.log("交易發送中...", tx.hash);
+    console.log("Transaction sending...", tx.hash);
     await tx.wait();
-    console.log("交易成功:", tx.hash);
+    console.log("Transaction success:", tx.hash);
   };
 
   const getTransactions = async (token: Token): Promise<ITransaction[]> => {
