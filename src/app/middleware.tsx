@@ -1,16 +1,20 @@
 "use client";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { GlobalProvider } from "@/contexts/GlobalContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { IAccount } from "@/types/bo";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-
 export function ProviderLayer({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <GlobalProvider>{children}</GlobalProvider>;
+  return (
+    <GlobalProvider>
+      <TooltipProvider>{children}</TooltipProvider>
+    </GlobalProvider>
+  );
 }
 
 export function Middleware() {

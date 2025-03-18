@@ -4,7 +4,7 @@ import { ProviderLayer } from "@/app/middleware";
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <ProviderLayer>
-      <div className="w-full">{children}</div>
+      <div className="w-full max-w-[540px]">{children}</div>
     </ProviderLayer>
   );
 }

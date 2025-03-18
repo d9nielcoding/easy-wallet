@@ -8,14 +8,12 @@ import { useSessionStorage } from "@/hooks/useSessionStorage";
 import { encryptMnemonic } from "@/lib/encrypt";
 import { cn } from "@/lib/utils";
 import { Chain, IAccount, IWallet } from "@/types/bo";
-import { Wallet } from "ethers";
-import { Dices } from "lucide-react";
+import { ethers } from "ethers";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 
-export default function CreateWallet() {
-  // const { account, setAccount } = useGlobalContext();
+export default function ImportWallet() {
   const [account, setAccount] = useLocalStorage<IAccount | null>(
     "account",
     null
@@ -25,21 +23,11 @@ export default function CreateWallet() {
   const [displayName, setDisplayName] = useState("");
   const [pwd, setPwd] = useState("");
   const [pwdConfirm, setPwdConfirm] = useState("");
+  const [recoveryPhrase, setRecoveryPhrase] = useState("");
   const [ableToCreateWallet, setAbleToCreateWallet] = useState(false);
   const [pwdNotMatch, setPwdNotMatch] = useState(false);
   const [wallet, setWallet] = useState<IWallet | null>(null);
   const router = useRouter();
-
-  const generateEthereumWallet = () => {
-    const newWallet = Wallet.createRandom();
-
-    setWallet({
-      address: newWallet.address,
-      mnemonic: newWallet.mnemonic?.phrase || undefined,
-      mnkey: undefined,
-      chain: Chain.ETHEREUM,
-    });
-  };
 
   useEffect(() => {
     if (pwd.length === 0 || pwdConfirm.length === 0) {
@@ -61,6 +49,22 @@ export default function CreateWallet() {
       setAbleToCreateWallet(true);
     }
   }, [pwdNotMatch, displayName]);
+
+  const handleValidate = () => {
+    const wallet = ethers.Wallet.fromPhrase(recoveryPhrase);
+
+    if (!wallet.mnemonic) {
+      toast.error("Failed to generate recovery phrase");
+      return;
+    }
+
+    setWallet({
+      address: wallet.address,
+      mnemonic: wallet.mnemonic?.phrase,
+      mnkey: encryptMnemonic(wallet.mnemonic?.phrase, pwd),
+      chain: Chain.ETHEREUM,
+    });
+  };
 
   const handleNext = () => {
     if (displayName === "") {
@@ -101,7 +105,7 @@ export default function CreateWallet() {
   return (
     <div className="bg-background flex min-h-screen flex-col items-start gap-6 p-16 text-white">
       <h1 className="text-primary self-center text-4xl font-black">
-        Create Account
+        Import Recovery Phrase
       </h1>
       <div id="account-name" className="flex w-full flex-col gap-2">
         <Title title="Account Name" />
@@ -131,15 +135,20 @@ export default function CreateWallet() {
       <div id="wallet-address" className="flex w-full flex-col gap-2">
         <Title title="Generate Wallet" />
         {wallet === null && (
-          <Button
-            onClick={generateEthereumWallet}
-            size="lg"
-            disabled={!ableToCreateWallet}
-            className="flex w-full items-center gap-2 text-lg font-bold"
-          >
-            <Dices />
-            Generate
-          </Button>
+          <>
+            <Input
+              placeholder="Enter your recovery phrase here"
+              value={recoveryPhrase}
+              onChange={(e) => setRecoveryPhrase(e.target.value)}
+            />
+            <Button
+              className="mt-6"
+              disabled={recoveryPhrase.length === 0}
+              onClick={handleValidate}
+            >
+              Validate
+            </Button>
+          </>
         )}
         {wallet && (
           <div className="bg-card flex w-full max-w-md flex-col gap-4 rounded-lg p-4 text-center">

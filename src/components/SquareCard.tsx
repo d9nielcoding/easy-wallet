@@ -5,10 +5,12 @@ export default function SquareCard({
   className,
   children,
   onClick,
+  disabled = false,
 }: {
   className?: string;
   children: React.ReactNode;
   onClick?: () => void;
+  disabled?: boolean;
 }) {
   return (
     <Card
@@ -17,6 +19,7 @@ export default function SquareCard({
         className
       )}
       onClick={onClick}
+      disabled={disabled}
     >
       {children}
     </Card>
