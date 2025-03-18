@@ -1,38 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/d9nielcoding/easy-wallet">
+    <img src="public/easy-wallet.png" alt="Logo" width="80" height="80">
+  </a>
 
-## Getting Started
+  <h3 align="center">Easy Wallet</h3>
 
-First, run the development server:
+  <p align="center">
+    This is a demo application for a web3 wallet.
+</div>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Tech Stack
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[![NextJs][nextjs-shield]][ref-nextjs]
+[![Typescript][typescript-shield]][ref-typescript]
+[![TailwindCSS][tailwindcss-shield]][ref-tailwindcss]
+[![Shadcn][shadcn-shield]][ref-shadcn]
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Demo
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+The demo of this application can be found [here](https://easy-wallet-six.vercel.app/createWallet).
 
-## Learn More
+![Demo](demo.png)
 
-To learn more about Next.js, take a look at the following resources:
+<!-- BADGE LINKS -->
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+[nextjs-shield]: https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white
+[typescript-shield]: https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white
+[tailwindcss-shield]: https://img.shields.io/badge/Tailwind_CSS-grey?style=for-the-badge&logo=tailwind-css&logoColor=38B2AC
+[shadcn-shield]: https://img.shields.io/badge/shadcn/ui-000000?style=for-the-badge&logo=shadcn/ui&logoColor=white
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-
-# easy-wallet
+<!-- Reference -->
+[ref-nextjs]: https://nextjs.org/
+[ref-typescript]: https://www.typescriptlang.org/
+[ref-tailwindcss]: https://tailwindcss.com/
+[ref-shadcn]: https://ui.shadcn.com/
