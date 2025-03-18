@@ -9,6 +9,7 @@ export default function History() {
   const { getTransactions } = useWallet();
   const [transactions, setTransactions] = useState<ITransaction[]>([]);
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -25,6 +26,7 @@ export default function History() {
     };
     fetchTransactions();
   }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <div>
@@ -35,19 +37,20 @@ export default function History() {
           </p>
         </div>
       )}
-      {transactions.map((transaction) => (
-        <ListCard key={transaction.hash}>
-          <div>
-            <p>{transaction.hash}</p>
-            <p>{transaction.from}</p>
-            <p>{transaction.to}</p>
-            <p>{transaction.value}</p>
-            <p>{transaction.timestamp}</p>
-            <p>{transaction.tokenName ?? Token.ETH}</p>
-            <p>{transaction.tokenSymbol ?? Token.ETH}</p>
-          </div>
-        </ListCard>
-      ))}
+      {transactions.length > 0 &&
+        transactions.map((transaction, index) => (
+          <ListCard key={`${transaction.hash}%${index}`}>
+            <div>
+              <p>{transaction.hash}</p>
+              <p>{transaction.from}</p>
+              <p>{transaction.to}</p>
+              <p>{transaction.value}</p>
+              <p>{transaction.timestamp}</p>
+              <p>{transaction.tokenName ?? Token.ETH}</p>
+              <p>{transaction.tokenSymbol ?? Token.ETH}</p>
+            </div>
+          </ListCard>
+        ))}
     </div>
   );
 }

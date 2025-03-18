@@ -106,6 +106,7 @@ export default function HomePage() {
     }
   };
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (!account) {
       return;
@@ -139,6 +140,7 @@ export default function HomePage() {
     };
     fetchBalanceAndPrice();
   }, [account]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <div className="bg-background text-foreground flex min-h-screen flex-col">

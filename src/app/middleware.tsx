@@ -26,7 +26,7 @@ export function Middleware() {
     if (account === null) {
       router.push("/createWallet");
     }
-  }, [account]);
+  }, [account, router]);
 
   return <></>;
 }

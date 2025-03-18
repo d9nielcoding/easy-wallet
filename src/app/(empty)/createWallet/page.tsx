@@ -165,7 +165,7 @@ export default function CreateWallet() {
               displayName === "" ? "cursor-default opacity-50" : "opacity-100"
             )}
           >
-            Ok! Let's go!
+            {"Ok! Let's go!"}
           </Button>
         )}
       </div>

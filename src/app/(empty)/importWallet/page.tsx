@@ -24,7 +24,7 @@ export default function ImportWallet() {
   const [pwd, setPwd] = useState("");
   const [pwdConfirm, setPwdConfirm] = useState("");
   const [recoveryPhrase, setRecoveryPhrase] = useState("");
-  const [ableToCreateWallet, setAbleToCreateWallet] = useState(false);
+  const [ableToImportWallet, setAbleToImportWallet] = useState(false);
   const [pwdNotMatch, setPwdNotMatch] = useState(false);
   const [wallet, setWallet] = useState<IWallet | null>(null);
   const router = useRouter();
@@ -43,12 +43,18 @@ export default function ImportWallet() {
   }, [pwd, pwdConfirm]);
 
   useEffect(() => {
-    if (pwdNotMatch || displayName === "") {
-      setAbleToCreateWallet(false);
+    if (
+      pwdNotMatch ||
+      displayName === "" ||
+      pwd === "" ||
+      pwdConfirm === "" ||
+      recoveryPhrase === ""
+    ) {
+      setAbleToImportWallet(false);
     } else {
-      setAbleToCreateWallet(true);
+      setAbleToImportWallet(true);
     }
-  }, [pwdNotMatch, displayName]);
+  }, [pwdNotMatch, displayName, pwd, pwdConfirm, recoveryPhrase]);
 
   const handleValidate = () => {
     const wallet = ethers.Wallet.fromPhrase(recoveryPhrase);
@@ -104,7 +110,7 @@ export default function ImportWallet() {
 
   return (
     <div className="bg-background flex min-h-screen flex-col items-start gap-6 p-16 text-white">
-      <h1 className="text-primary self-center text-4xl font-black">
+      <h1 className="text-primary self-center text-3xl font-black">
         Import Recovery Phrase
       </h1>
       <div id="account-name" className="flex w-full flex-col gap-2">
@@ -143,7 +149,7 @@ export default function ImportWallet() {
             />
             <Button
               className="mt-6"
-              disabled={recoveryPhrase.length === 0}
+              disabled={!ableToImportWallet}
               onClick={handleValidate}
             >
               Validate
@@ -174,7 +180,7 @@ export default function ImportWallet() {
               displayName === "" ? "cursor-default opacity-50" : "opacity-100"
             )}
           >
-            Ok! Let's go!
+            {"Ok! Let's go!"}
           </Button>
         )}
       </div>

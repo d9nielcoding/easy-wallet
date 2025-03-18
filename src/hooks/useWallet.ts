@@ -5,13 +5,16 @@ import { useSessionStorage } from "@/hooks/useSessionStorage";
 import { decryptMnemonic } from "@/lib/encrypt";
 import { Erc20Token, IAccount, ITransaction, Token } from "@/types/bo";
 import { ethers } from "ethers";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 export function useWallet() {
   const [wallet, setWallet] = useState<ethers.Wallet | null>(null);
   const [pwd] = useSessionStorage("pwd", "");
   const [account] = useLocalStorage<IAccount | null>("account", null);
-  const provider = new ethers.JsonRpcProvider("https://eth.llamarpc.com");
+  const provider = useMemo(
+    () => new ethers.JsonRpcProvider("https://eth.llamarpc.com"),
+    []
+  );
 
   const etherscanApiKey = process.env.NEXT_PUBLIC_ETHERSCAN_API_KEY;
 
@@ -47,31 +50,34 @@ export function useWallet() {
     setWallet(new ethers.Wallet(hdwallet.privateKey, provider));
   }, []);
 
-  const getBalance = async (token: Token): Promise<number | null> => {
-    if (!account) {
-      console.log("Error: Account not found");
-      return null;
-    }
-
-    if (token === Token.ETH) {
-      const balance = await provider.getBalance(account.wallet.address);
-      return Number(ethers.formatEther(balance));
-    } else {
-      const erc20Token = token as unknown as Erc20Token;
-      if (!tokenAddresses[erc20Token]) {
-        console.log(token, "Error: Token address not found");
+  const getBalance = useCallback(
+    async (token: Token): Promise<number | null> => {
+      if (!account) {
+        console.log("Error: Account not found");
         return null;
       }
-      const erc20Contract = new ethers.Contract(
-        tokenAddresses[erc20Token],
-        erc20Abi,
-        provider
-      );
-      const balance = await erc20Contract.balanceOf(account.wallet.address);
-      const decimals = await erc20Contract.decimals();
-      return Number(ethers.formatUnits(balance, decimals));
-    }
-  };
+
+      if (token === Token.ETH) {
+        const balance = await provider.getBalance(account.wallet.address);
+        return Number(ethers.formatEther(balance));
+      } else {
+        const erc20Token = token as unknown as Erc20Token;
+        if (!tokenAddresses[erc20Token]) {
+          console.log(token, "Error: Token address not found");
+          return null;
+        }
+        const erc20Contract = new ethers.Contract(
+          tokenAddresses[erc20Token],
+          erc20Abi,
+          provider
+        );
+        const balance = await erc20Contract.balanceOf(account.wallet.address);
+        const decimals = await erc20Contract.decimals();
+        return Number(ethers.formatUnits(balance, decimals));
+      }
+    },
+    [account, provider]
+  );
 
   const sendEth = async (to: string, amountEth: string) => {
     if (!wallet) {
@@ -115,18 +121,21 @@ export function useWallet() {
     console.log("Transaction success:", tx.hash);
   };
 
-  const getTransactions = async (token: Token): Promise<ITransaction[]> => {
-    if (!account?.wallet.address) {
-      console.log("Error: Wallet not found");
-      return [];
-    }
-    const action = token === Token.ETH ? "txlist" : "tokentx";
-    const response = await fetch(
-      `https://api.etherscan.io/api?module=account&action=${action}&address=${account.wallet?.address}&startblock=0&endblock=99999999&sort=desc&apikey=${etherscanApiKey}`
-    );
-    const data = await response.json();
-    return data.result as ITransaction[];
-  };
+  const getTransactions = useCallback(
+    async (token: Token): Promise<ITransaction[]> => {
+      if (!account?.wallet.address) {
+        console.log("Error: Wallet not found");
+        return [];
+      }
+      const action = token === Token.ETH ? "txlist" : "tokentx";
+      const response = await fetch(
+        `https://api.etherscan.io/api?module=account&action=${action}&address=${account.wallet?.address}&startblock=0&endblock=99999999&sort=desc&apikey=${etherscanApiKey}`
+      );
+      const data = await response.json();
+      return data.result as ITransaction[];
+    },
+    [account, etherscanApiKey]
+  );
 
   return { getBalance, sendEth, sendErc20, wallet, getTransactions };
 }
